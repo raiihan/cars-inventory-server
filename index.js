@@ -37,7 +37,10 @@ async function run() {
         const productCollection = client.db("productInventory").collection('products');
 
         app.get('/products', async (req, res) => {
-            res.send({ me: 'hello' })
+            const query = {};
+            const cursor = productCollection.find(query);
+            const products = await cursor.toArray();
+            res.send(products)
         })
 
         // add post
