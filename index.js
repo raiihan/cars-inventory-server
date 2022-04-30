@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -48,6 +48,19 @@ async function run() {
             const body = req.body;
             const result = await productCollection.insertOne(body);
             res.send(result)
+        })
+
+        // update post
+        app.put('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const body = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: body
+            }
+            const result = await productCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
     }
     finally { }
