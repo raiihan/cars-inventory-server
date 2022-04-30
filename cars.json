@@ -1,0 +1,11 @@
+[
+    {
+        "name": "Mercedes-Benz C-Class 2015",
+        "email": "abc@a.com",
+        "img": "https://i.ibb.co/J5JRgrT/car1.jpg",
+        "description": "BODY: Sedan, MILEAGE:100, FUEL TYPE: Hybrid, ENGINE: 3000, YEAR: 2015, TRANSMISSION: Automatic, DRIVE: 4WD, FUEL ECONOMY: 23.5",
+        "quantity": 22,
+        "price": "23459",
+        "supplier": "jhanker"
+    }
+]
