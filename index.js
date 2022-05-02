@@ -50,6 +50,21 @@ async function run() {
             res.send(products)
         })
 
+        // get a single a product
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await productCollection.findOne(query);
+            res.send(product);
+        })
+        // product search by supplier
+        app.get('/productBySupplier', async (req, res) => {
+            const supplier = req.query.supplier;
+            const query = { supplier: { $regex: supplier, $options: '$i' } };
+            const cursor = productCollection.find(query);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
         // add post
         app.post('/product', async (req, res) => {
             const body = req.body;
