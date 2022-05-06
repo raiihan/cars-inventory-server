@@ -17,7 +17,7 @@ function verifyJWT(req, res, next) {
         res.status(401).send({ message: 'Unathorized Access' });
     }
     const token = authHeader.split(" ")[1];
-    const accessToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             res.status(403).send({ message: 'Forbidden' });
         }
@@ -35,21 +35,43 @@ async function run() {
     try {
         await client.connect()
         const productCollection = client.db("productInventory").collection('products');
-
+        // authentication with jwt
+        app.post('/createJWT', (req, res) => {
+            const email = req.body;
+            const accessToken = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
+        })
+        // product
         app.get('/products', async (req, res) => {
-            const email = req.query.email;
-            const query = { email };
-            let cursor;
-            if (email) {
-                cursor = productCollection.find(query);
+            const currentPage = req.query.currentPage;
+            const query = {};
+            const cursor = productCollection.find(query);
+            let products;
+            if (currentPage) {
+                products = await cursor.skip(currentPage * 5).limit(5).toArray();
             }
             else {
-                cursor = productCollection.find({});
+                products = await cursor.toArray();
             }
-            const products = await cursor.toArray();
             res.send(products)
         })
+        // get my order with email
+        app.get('/myorder', verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if (email === decodedEmail) {
+                const query = { email };
+                const cursor = productCollection.find(query);
+                const products = await cursor.toArray();
+                res.send(products)
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden' });
+            }
 
+        })
         // get a single a product
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
@@ -91,6 +113,13 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const result = await productCollection.deleteOne(query);
             res.send(result);
+        })
+
+
+        // product quantity
+        app.get('/productCount', async (req, res) => {
+            const count = await productCollection.estimatedDocumentCount();
+            res.send({ count });
         })
     }
     finally { }
