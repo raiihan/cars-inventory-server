@@ -50,10 +50,10 @@ async function run() {
             const cursor = productCollection.find(query);
             let products;
             if (currentPage) {
-                products = await cursor.skip(currentPage * 5).limit(5).toArray();
+                products = await cursor.skip(currentPage * 5).limit(5).sort({ _id: -1 }).toArray();
             }
             else {
-                products = await cursor.toArray();
+                products = await cursor.sort({ _id: -1 }).toArray();
             }
             res.send(products)
         })
@@ -81,12 +81,13 @@ async function run() {
         })
         // product search by supplier
         app.get('/productBySupplier', async (req, res) => {
-            const supplier = req.query.supplier;
-            const query = { supplier: { $regex: supplier, $options: '$i' } };
+            const supplierName = req.query.supplier;
+            const query = { supplier: { $regex: supplierName, $options: '$i' } };
             const cursor = productCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
         })
+
         // add post
         app.post('/product', async (req, res) => {
             const body = req.body;
